@@ -9,3 +9,6 @@ Config.NPC = {
 
 -- Valor mínimo para o saldo total antes de permitir saques
 Config.MinBalance = 1000000 -- Saldo mínimo (R$ 1.000.000)
+
+-- Tipo de item usado para saque
+Config.SaqueItem = "dinheirosujo"

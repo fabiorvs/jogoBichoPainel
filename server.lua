@@ -43,3 +43,53 @@ AddEventHandler("jogoBichoPainel:verificarDono", function()
         TriggerClientEvent("jogoBichoPainel:abrirPainel", src, false)
     end
 end)
+
+
+RegisterNetEvent("jogoBichoPainel:sacarValor")
+AddEventHandler("jogoBichoPainel:sacarValor", function(valor)
+    local src = source
+    local user_id = vRP.getUserId(src)
+
+    if user_id then
+        valor = tonumber(valor)
+
+        if valor and valor > 0 then
+            -- Obter o saldo atual
+            local saldoAtual = vRP.query("jogoBicho/get_saldo_atual", {})[1].saldo
+
+            -- Calcular o saldo disponível
+            local saldoDisponivel = saldoAtual - Config.MinBalance
+
+            if saldoDisponivel >= valor then
+                -- Atualizar o saldo no banco de dados
+                local novoSaldo = saldoAtual - valor
+                vRP._execute("jogoBicho/update_saldo", { saldo = novoSaldo })
+
+                -- Registrar a transação no histórico
+                vRP._execute("jogoBicho/insert_transacao", {
+                    tipo_transacao = "Saque",
+                    valor = -valor,
+                    descricao = string.format("Saque realizado pelo dono %d", user_id),
+                    saldo_apos = novoSaldo
+                })
+
+                -- Adicionar o item ou dinheiro ao usuário
+                if Config.SaqueItem and Config.SaqueItem ~= "" then
+                    vRP.giveInventoryItem(user_id, Config.SaqueItem, valor, true)
+                else
+                    vRP.giveMoney(user_id, valor)
+                end
+
+                -- Enviar atualização ao cliente
+                TriggerClientEvent("jogoBichoPainel:atualizarSaldos", src, novoSaldo, saldoDisponivel - valor)
+                TriggerClientEvent("jogoBichoPainel:mostrarMensagem", src, "sucesso", "Saque realizado com sucesso!!!")
+            else
+                TriggerClientEvent("jogoBichoPainel:mostrarMensagem", src, "erro", "Saldo disponível insuficiente para o saque.")
+            end
+        else
+            TriggerClientEvent("jogoBichoPainel:mostrarMensagem", src, "erro", "Valor inválido para saque.")
+        end
+    else
+        TriggerClientEvent("jogoBichoPainel:mostrarMensagem", src, "erro", "Usuário não identificado.")
+    end
+end)

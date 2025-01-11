@@ -81,3 +81,32 @@ table tbody::-webkit-scrollbar-thumb {
 table tbody::-webkit-scrollbar-track {
     background-color: #f1f1f1;
 }
+
+#acoesPainel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#valorSaque {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+#sacarValor {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#sacarValor:hover {
+    background-color: #45a049;
+}

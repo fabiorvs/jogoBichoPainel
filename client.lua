@@ -38,8 +38,6 @@ end)
 
 function DrawText3D(x, y, z, text)
     local onScreen, _x, _y = World3dToScreen2d(x, y, z)
-    local px, py, pz = table.unpack(GetGameplayCamCoords())
-
     if onScreen then
         SetTextScale(0.35, 0.35)
         SetTextFont(4)
@@ -54,6 +52,7 @@ function DrawText3D(x, y, z, text)
     end
 end
 
+-- Abrir o painel
 RegisterNetEvent("jogoBichoPainel:abrirPainel")
 AddEventHandler("jogoBichoPainel:abrirPainel", function(permitido, data)
     if permitido then
@@ -67,10 +66,11 @@ AddEventHandler("jogoBichoPainel:abrirPainel", function(permitido, data)
             extratoTransacoes = data.extratoTransacoes
         })
     else
-        TriggerEvent("Notify", "negado", "Você não tem permissão para acessar o painel.")
+        TriggerEvent("jogoBichoPainel:mostrarMensagem", "erro", "Você não tem permissão para acessar o painel.")
     end
 end)
 
+-- Fechar o painel
 RegisterNUICallback("fecharPainel", function(_, cb)
     painelAberto = false
     SetNuiFocus(false, false)
@@ -79,3 +79,52 @@ RegisterNUICallback("fecharPainel", function(_, cb)
     })
     cb("ok")
 end)
+
+-- Callback para saque
+RegisterNUICallback("sacarValor", function(data, cb)
+    if data.valor then
+        -- Converte o valor usando a função corrigida
+        local valorConvertido = converterBRParaNumero(data.valor)
+        if valorConvertido > 0 then
+            -- Enviar valor para o servidor
+            TriggerServerEvent("jogoBichoPainel:sacarValor", valorConvertido)
+        else
+            TriggerEvent("jogoBichoPainel:mostrarMensagem", "erro", "Por favor, insira um valor válido para saque.")
+        end
+    else
+        TriggerEvent("jogoBichoPainel:mostrarMensagem", "erro", "Por favor, insira um valor.")
+    end
+    cb("ok")
+end)
+
+-- Atualizar os saldos no painel após saque
+RegisterNetEvent("jogoBichoPainel:atualizarSaldos")
+AddEventHandler("jogoBichoPainel:atualizarSaldos", function(novoSaldo, saldoDisponivel)
+    -- Envia as atualizações para o NUI
+    SendNUIMessage({
+        action = "atualizarSaldos",
+        saldoTotal = novoSaldo,
+        saldoDisponivel = saldoDisponivel
+    })
+    -- Mensagem de sucesso
+    TriggerEvent("jogoBichoPainel:mostrarMensagem", "sucesso", "Saque realizado com sucesso!")
+end)
+
+-- Notificar erro no saque
+RegisterNetEvent("jogoBichoPainel:mostrarMensagem")
+AddEventHandler("jogoBichoPainel:mostrarMensagem", function(tipo, mensagem)
+    SendNUIMessage({
+        action = "mostrarMensagem",
+        tipo = tipo,
+        mensagem = mensagem
+    })
+end)
+
+-- Função para converter valor no formato BR para número
+function converterBRParaNumero(valorBR)
+    if type(valorBR) ~= "string" then
+        valorBR = tostring(valorBR)
+    end
+    local valor = valorBR:gsub("%.", ""):gsub(",", ".")
+    return tonumber(valor) or 0
+end
