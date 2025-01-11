@@ -44,6 +44,22 @@ AddEventHandler("jogoBichoPainel:verificarDono", function()
     end
 end)
 
+RegisterNetEvent("jogoBichoPainel:verificarDonoBlip")
+AddEventHandler("jogoBichoPainel:verificarDonoBlip", function()
+    local src = source
+    local user_id = vRP.getUserId(src)
+
+    if user_id then
+        local donoAtual = vRP.query("jogoBicho/get_dono_atual", {})[1]
+        if donoAtual and tonumber(donoAtual.user_id) == user_id then
+            TriggerClientEvent("jogoBichoPainel:adicionarBlip", src)
+        else
+            TriggerClientEvent("jogoBichoPainel:removerBlip", src)
+        end
+    else
+        TriggerClientEvent("jogoBichoPainel:removerBlip", src)
+    end
+end)
 
 RegisterNetEvent("jogoBichoPainel:sacarValor")
 AddEventHandler("jogoBichoPainel:sacarValor", function(valor)

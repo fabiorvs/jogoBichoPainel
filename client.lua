@@ -1,5 +1,16 @@
 local painelAberto = false
 local npcCriado = false
+local blipCriado = false
+
+Citizen.CreateThread(function()
+    while true do
+        Citizen.Wait(1000) -- Verificar a cada segundo
+
+        if not blipCriado then
+            TriggerServerEvent("jogoBichoPainel:verificarDonoBlip")
+        end
+    end
+end)
 
 Citizen.CreateThread(function()
     while true do
@@ -128,3 +139,29 @@ function converterBRParaNumero(valorBR)
     local valor = valorBR:gsub("%.", ""):gsub(",", ".")
     return tonumber(valor) or 0
 end
+
+
+-- Eventos para adicionar e remover blip
+RegisterNetEvent("jogoBichoPainel:adicionarBlip")
+AddEventHandler("jogoBichoPainel:adicionarBlip", function()
+    if not blipCriado then
+        local blip = AddBlipForCoord(Config.NPC.coords.x, Config.NPC.coords.y, Config.NPC.coords.z)
+        SetBlipSprite(blip, 474) -- Ícone do blip
+        SetBlipDisplay(blip, 4)
+        SetBlipScale(blip, 0.9)
+        SetBlipColour(blip, 0)
+        SetBlipAsShortRange(blip, true)
+        BeginTextCommandSetBlipName("STRING")
+        AddTextComponentString("Painel Jogo do Bicho")
+        EndTextCommandSetBlipName(blip)
+        blipCriado = blip
+    end
+end)
+
+RegisterNetEvent("jogoBichoPainel:removerBlip")
+AddEventHandler("jogoBichoPainel:removerBlip", function()
+    if blipCriado then
+        RemoveBlip(blipCriado)
+        blipCriado = false
+    end
+end)
