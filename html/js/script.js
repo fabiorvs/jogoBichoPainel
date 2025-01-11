@@ -2,29 +2,104 @@ $(document).ready(function () {
   $("#valorSaque").mask("000.000.000,00", { reverse: true });
 });
 
-// Listener para mensagens enviadas pelo servidor
+// Listener  enviadas pelo servidor
 window.addEventListener("message", function (event) {
   const data = event.data;
 
-  if (data.action === "abrir") {
-    abrirPainel(
-      data.saldoTotal,
-      data.saldoDisponivel,
-      data.historicoApostas,
-      data.extratoTransacoes
-    );
-  } else if (data.action === "fechar") {
-    fecharPainel();
+  switch (data.action) {
+    case "abrir":
+      abrirPainel(
+        data.saldoTotal,
+        data.saldoDisponivel,
+        data.historicoApostas,
+        data.extratoTransacoes
+      );
+      break;
+    case "fechar":
+      fecharPainel();
+      break;
+    case "mensagemErro":
+      Swal.fire({
+        icon: "error",
+        title: data.title,
+        text: data.text,
+      });
+      break;
+    case "mensagemSucesso":
+      Swal.fire({
+        icon: "success",
+        title: data.title,
+        text: data.text,
+      });
+      break;
+
+    case "atualizarSaldos":
+      atualizarSaldos(data.saldoTotal, data.saldoDisponivel);
+      break;
+
+    case "mostrarMensagem":
+      if (data.tipo === "sucesso") {
+        Swal.fire({
+          icon: "success",
+          title: "Sucesso",
+          text: data.mensagem,
+        });
+      } else if (data.tipo === "erro") {
+        Swal.fire({
+          icon: "error",
+          title: "Erro",
+          text: data.mensagem,
+        });
+      }
+      break;
+
+    case "abrir":
+      abrirPainel(
+        data.saldoTotal,
+        data.saldoDisponivel,
+        data.historicoApostas,
+        data.extratoTransacoes
+      );
+      break;
+
+    case "fechar":
+      fecharPainel();
+      break;
   }
 });
 
-// Fechar painel ao clicar no botão
+// Fechar painel ao clicar no botão fechar
 document.getElementById("fecharPainel").addEventListener("click", function () {
   fetch(`https://${GetParentResourceName()}/fecharPainel`, {
     method: "POST",
   }).then(() => {
     fecharPainel();
   });
+});
+
+// Fechar painel ao clicar no botão sacar
+document.getElementById("sacarValor").addEventListener("click", function () {
+  const valor = document.getElementById("valorSaque").value;
+  console.log(valor);
+
+  // Envia o valor para o servidor
+  fetch(`https://${GetParentResourceName()}/sacarValor`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ valor }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data === "ok") {
+        document.getElementById("valorSaque").value = ""; // Limpa o campo
+      } else {
+        console.log(data.message || "Erro ao realizar o saque.");
+      }
+    })
+    .catch((error) => {
+      console.error("Erro ao comunicar com o servidor:", error);
+      console.log("Erro ao processar o saque.");
+    });
 });
 
 // Função para fechar o painel
@@ -119,6 +194,7 @@ function formatarData(data) {
   });
 }
 
+//Função para retornar Bicho
 function getBichoNome(id) {
   const bichosMap = {
     1: "Avestruz",
@@ -150,67 +226,6 @@ function getBichoNome(id) {
   return bichosMap[id] || "Desconhecido";
 }
 
-document.getElementById("sacarValor").addEventListener("click", function () {
-  const valor = document.getElementById("valorSaque").value;
-  console.log(valor);
-
-  // Envia o valor para o servidor
-  fetch(`https://${GetParentResourceName()}/sacarValor`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ valor }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data === "ok") {
-        document.getElementById("valorSaque").value = ""; // Limpa o campo
-      } else {
-        console.log(data.message || "Erro ao realizar o saque.");
-      }
-    })
-    .catch((error) => {
-      console.error("Erro ao comunicar com o servidor:", error);
-      console.log("Erro ao processar o saque.");
-    });
-});
-
-// Listener para mensagens enviadas pelo servidor
-window.addEventListener("message", function (event) {
-  const data = event.data;
-
-  switch (data.action) {
-    case "abrir":
-      abrirPainel(
-        data.saldoTotal,
-        data.saldoDisponivel,
-        data.historicoApostas,
-        data.extratoTransacoes
-      );
-      break;
-    case "fechar":
-      fecharPainel();
-      break;
-    case "mensagemErro":
-      Swal.fire({
-        icon: "error",
-        title: data.title,
-        text: data.text,
-      });
-      break;
-    case "mensagemSucesso":
-      Swal.fire({
-        icon: "success",
-        title: data.title,
-        text: data.text,
-      });
-      break;
-
-    case "atualizarSaldos":
-      atualizarSaldos(data.saldoTotal, data.saldoDisponivel);
-      break;
-  }
-});
-
 // Função para atualizar os saldos
 function atualizarSaldos(saldoTotal, saldoDisponivel) {
   document.getElementById("saldoTotal").innerText = formatCurrency(saldoTotal);
@@ -224,24 +239,3 @@ function formatCurrency(value) {
     currency: "BRL",
   }).format(value);
 }
-
-// Listener para mensagens enviadas pelo servidor
-window.addEventListener("message", function (event) {
-  const data = event.data;
-
-  if (data.action === "mostrarMensagem") {
-    if (data.tipo === "sucesso") {
-      Swal.fire({
-        icon: "success",
-        title: "Sucesso",
-        text: data.mensagem,
-      });
-    } else if (data.tipo === "erro") {
-      Swal.fire({
-        icon: "error",
-        title: "Erro",
-        text: data.mensagem,
-      });
-    }
-  }
-});
