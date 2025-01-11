@@ -24,13 +24,18 @@ Citizen.CreateThread(function()
                 Citizen.Wait(10)
             end
 
+            -- Criar o NPC
             local ped = CreatePed(4, npcModel, Config.NPC.coords.x, Config.NPC.coords.y, Config.NPC.coords.z - 1.0,
                 Config.NPC.heading, false, true)
-            SetEntityInvincible(ped, true)
-            FreezeEntityPosition(ped, true)
-            SetBlockingOfNonTemporaryEvents(ped, true)
-            TaskStartScenarioInPlace(ped, "WORLD_HUMAN_CLIPBOARD", 0, true)
 
+            SetEntityInvincible(ped, true) -- Torna o NPC invencível
+            FreezeEntityPosition(ped, true) -- Impede que o NPC se mova
+            SetBlockingOfNonTemporaryEvents(ped, true) -- Impede que o NPC reaja a eventos
+
+            -- Dar o fuzil para o NPC
+            local weaponHash = GetHashKey("WEAPON_PUMPSHOTGUN")
+            GiveWeaponToPed(ped, weaponHash, 9999, true, true) -- Dar a arma ao NPC
+            SetCurrentPedWeapon(ped, weaponHash, true) -- Garantir que a arma seja equipada
             npcCriado = true
         end
 
@@ -77,7 +82,7 @@ AddEventHandler("jogoBichoPainel:abrirPainel", function(permitido, data)
             extratoTransacoes = data.extratoTransacoes
         })
     else
-        TriggerEvent("jogoBichoPainel:mostrarMensagem", "erro", "Você não tem permissão para acessar o painel.")
+        -- TriggerEvent("jogoBichoPainel:mostrarMensagem", "erro", "Você não tem permissão para acessar o painel.")
     end
 end)
 
@@ -140,7 +145,6 @@ function converterBRParaNumero(valorBR)
     return tonumber(valor) or 0
 end
 
-
 -- Eventos para adicionar e remover blip
 RegisterNetEvent("jogoBichoPainel:adicionarBlip")
 AddEventHandler("jogoBichoPainel:adicionarBlip", function()
@@ -148,7 +152,7 @@ AddEventHandler("jogoBichoPainel:adicionarBlip", function()
         local blip = AddBlipForCoord(Config.NPC.coords.x, Config.NPC.coords.y, Config.NPC.coords.z)
         SetBlipSprite(blip, 474) -- Ícone do blip
         SetBlipDisplay(blip, 4)
-        SetBlipScale(blip, 0.9)
+        SetBlipScale(blip, 0.6)
         SetBlipColour(blip, 0)
         SetBlipAsShortRange(blip, true)
         BeginTextCommandSetBlipName("STRING")

@@ -37,10 +37,10 @@ AddEventHandler("jogoBichoPainel:verificarDono", function()
                 extratoTransacoes = extratoTransacoes
             })
         else
-            TriggerClientEvent("jogoBichoPainel:abrirPainel", src, false)
+            TriggerClientEvent("Notify", src, "negado", "Você não tem permissão para acessar o painel.")
         end
     else
-        TriggerClientEvent("jogoBichoPainel:abrirPainel", src, false)
+        TriggerClientEvent("Notify", src, "negado", "Você não tem permissão para acessar o painel.")
     end
 end)
 
