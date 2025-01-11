@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Painel do Dono</title>
+</head>
+<body>
+    <div id="painel">
+        <h1>Painel do Dono</h1>
+        <div id="saldos">
+            <p><strong>Saldo Total:</strong> <span id="saldoTotal">R$ 0,00</span></p>
+            <p><strong>Saldo Disponível:</strong> <span id="saldoDisponivel">R$ 0,00</span></p>
+        </div>
+        <div id="historicoApostas">
+            <h2>Histórico de Apostas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Valor</th>
+                        <th>Bicho</th>
+                        <th>Prêmio</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div id="extratoTransacoes">
+            <h2>Extrato de Transações</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Tipo</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <button id="fecharPainel">Fechar</button>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+</html>
