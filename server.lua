@@ -1,34 +1,45 @@
 local Tunnel = module("vrp", "lib/Tunnel")
 local Proxy = module("vrp", "lib/Proxy")
 vRP = Proxy.getInterface("vRP")
+vRPclient = Tunnel.getInterface("vRP")
 
--- Dados simulados para teste
-local saldoTotal = 2000000
-local historicoApostas = {
-    { data = "2025-01-09", valor = 5000, bicho = "Avestruz", premio = "R$ 15.000" },
-    { data = "2025-01-08", valor = 3000, bicho = "Cachorro", premio = "Perdeu" }
-}
-local extratoTransacoes = {
-    { data = "2025-01-09", tipo = "Aposta", valor = "-5000" },
-    { data = "2025-01-08", tipo = "Saque", valor = "-10000" }
-}
+vRP._prepare("jogoBicho/get_dono_atual", [[
+    SELECT user_id FROM jogobicho_donos WHERE atual = 1
+]])
 
--- Calcular saldo disponível
-local function calcularSaldoDisponivel()
-    return saldoTotal - Config.MinBalance
-end
+vRP._prepare("jogoBicho/get_historico_apostas", [[
+    SELECT * FROM jogobicho_historico_apostas WHERE user_id = @user_id ORDER BY data_aposta DESC
+]])
 
--- Eventos para enviar dados ao cliente
-RegisterNetEvent("painelbicho:getDados")
-AddEventHandler("painelbicho:getDados", function()
-    local source = source
-    local user_id = vRP.getUserId(source)
+vRP._prepare("jogoBicho/get_historico_transacoes", [[
+    SELECT * FROM jogobicho_historico_transacoes ORDER BY data_transacao DESC
+]])
 
-    -- Verifica se o jogador é o dono
-    if vRP.hasPermission(user_id, "dono.jogobicho") then
-        local saldoDisponivel = calcularSaldoDisponivel()
-        TriggerClientEvent("painelbicho:receiveDados", source, saldoTotal, saldoDisponivel, historicoApostas, extratoTransacoes)
+
+RegisterNetEvent("jogoBichoPainel:verificarDono")
+AddEventHandler("jogoBichoPainel:verificarDono", function()
+    local src = source
+    local user_id = vRP.getUserId(src)
+
+    if user_id then
+        local donoAtual = vRP.query("jogoBicho/get_dono_atual", {})[1]
+        if donoAtual and tonumber(donoAtual.user_id) == user_id then
+            local saldoTotal = vRP.query("jogoBicho/get_saldo_atual", {})[1].saldo or 0
+            local saldoDisponivel = saldoTotal - Config.MinBalance
+
+            local historicoApostas = vRP.query("jogoBicho/get_historico_apostas", { user_id = user_id }) or {}
+            local extratoTransacoes = vRP.query("jogoBicho/get_historico_transacoes", {}) or {}
+
+            TriggerClientEvent("jogoBichoPainel:abrirPainel", src, true, {
+                saldoTotal = saldoTotal,
+                saldoDisponivel = saldoDisponivel > 0 and saldoDisponivel or 0,
+                historicoApostas = historicoApostas,
+                extratoTransacoes = extratoTransacoes
+            })
+        else
+            TriggerClientEvent("jogoBichoPainel:abrirPainel", src, false)
+        end
     else
-        TriggerClientEvent("Notify", source, "negado", "Você não tem acesso a este painel.")
+        TriggerClientEvent("jogoBichoPainel:abrirPainel", src, false)
     end
 end)
