@@ -2,7 +2,7 @@ Config = {}
 
 -- Coordenadas do NPC para acessar o painel
 Config.NPC = {
-    coords = vector3( 959.73, 3617.73, 32.72),
+    coords = vector3(959.73, 3617.73, 32.72),
     heading = 90.0,
     model = 'u_m_m_bikehire_01',
 }
