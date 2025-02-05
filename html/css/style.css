@@ -97,7 +97,7 @@ table tbody::-webkit-scrollbar {
 }
 
 table tbody::-webkit-scrollbar-thumb {
-    background-color: #4caf50;
+    background-color: var(--panel-bg);
     border-radius: 5px;
 }
 
